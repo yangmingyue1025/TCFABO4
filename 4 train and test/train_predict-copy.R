@@ -1,7 +1,7 @@
 library(Metrics)
-library(e1071)
+library(randomForest)
 
-data <- read.csv("/Users/yangmingyue/Desktop/78/训练与测试/SFSSCC新/svr/data.csv", encoding = "UTF-8")
+data <- read.csv("/Users/yangmingyue/Desktop/78/训练与测试/SFSSCC/rf/data.csv", encoding = "UTF-8")
 L <- dim(data)[1]
 
 # create the output matrices
@@ -21,11 +21,11 @@ for (a in c(1:1000)){
   test <- data[par==2,]
   
   set.seed(a)
-  svr <- svm(TCF~., train, gamma = 4, cost = 16,
-             kernel ="radial")
+  rf <- randomForest(TCF~., train, mtry = 2, 
+                     ntree = 450, maxnodes = 30)
   
   ### training and testing results ###
-  ptrain <- predict(svr, train)
+  ptrain <- predict(rf, train)
   rmse_train[1,a] <- rmse(train$TCF,ptrain) # RMSE of the training data set
   
   R2a <- matrix(0, nrow = length(ptrain), ncol = 2)
@@ -37,7 +37,7 @@ for (a in c(1:1000)){
   la <- lm(TCF~.,R2a)
   r2_train[1,a] <- as.numeric(summary(la)["r.squared"]) # R2 of the training data set
   
-  ptest <- predict(svr, test)
+  ptest <- predict(rf, test)
   rmse_test[1,a] <- rmse(test$TCF,ptest) # RMSE of the testing data set
   
   R2b <- matrix(0, nrow = length(ptest), ncol = 2)
@@ -73,7 +73,7 @@ for (a in c(1:1000)){
   a = a+1
 }
 
-ad <- "/Users/yangmingyue/Desktop/78/训练与测试/SFSSCC新/svr/"                      # change the ##output file path## into the real output file path
+ad <- "/Users/yangmingyue/Desktop/78/训练与测试/SFSSCC/rf/"     # change the ##output file path## into the real output file path
 
 write.csv(rmse_train, paste(ad, "rmse_train.csv"))
 write.csv(r2_train, paste(ad, "r2_train.csv"))
